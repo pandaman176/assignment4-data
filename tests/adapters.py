@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import os
 from typing import Any
+from cs336_data import extractor
 
 
 
 def run_extract_text_from_html_bytes(html_bytes: bytes) -> str | None:
+    return extractor.html2text(html_bytes)
     raise NotImplementedError
 
 
