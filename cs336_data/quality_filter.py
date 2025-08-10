@@ -5,6 +5,11 @@ except LookupError:
     nltk.download('punkt_tab')
 from nltk.tokenize import word_tokenize
 from cs336_data.extractor import extract_texts_from_warc
+from cs336_data.train import perplexity_of_text, tokenize_english
+import pickle
+import os
+import cs336_data.common as common
+from typing import Any
 
 
 def gopher_filter(text: str) -> bool:
@@ -16,7 +21,7 @@ def gopher_filter(text: str) -> bool:
     """
     tokens = word_tokenize(text)
     length = len(tokens)
-    if length < 50 or length > 100000:
+    if length < 50 or length > 100_000:
         return False
 
     mean_word_length = sum(len(token) for token in tokens) / length
@@ -40,6 +45,23 @@ def gopher_filter(text: str) -> bool:
     
     return True
 
+def classify_quality(text: str) -> tuple[Any, float]:
+    # load model
+    if os.path.exists(common.ASSETS_PATH / "model.pkl"):
+        with open(common.ASSETS_PATH / "model.pkl", "rb") as f:
+            model = pickle.load(f)
+    else:
+        print("No model found. Please run perplexity_of_file.py first.")
+        exit()
+    n = 3  # trigram 推荐起点
+    tokenizer = tokenize_english
+    ppl = perplexity_of_text(model, tokenizer(text), n)
+    if ppl < 500:
+        return "wiki", 0.9
+    else:
+        return "cc", 0.9
+    
+    
 if __name__ == "__main__":
     for item in extract_texts_from_warc("../data/CC/CC-MAIN-20250417135010-20250417165010-00065.warc.gz"):
         if gopher_filter(item):
