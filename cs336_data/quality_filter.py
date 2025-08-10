@@ -56,6 +56,7 @@ def classify_quality(text: str) -> tuple[Any, float]:
     n = 3  # trigram 推荐起点
     tokenizer = tokenize_english
     ppl = perplexity_of_text(model, tokenizer(text), n)
+    # TODO: provide real quality score instead of just using placeholder 0.9
     if ppl < 500:
         return "wiki", 0.9
     else:
